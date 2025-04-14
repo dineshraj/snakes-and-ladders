@@ -1,6 +1,8 @@
 import SnakesAndLadders, { someoneHasWon } from '../src/.';
 import * as snakesAndLadders from '../src/.';
 import readline, { Interface } from 'node:readline/promises';
+import { MORON, ROLL, WINNER, YOUR_MOVE } from './lang';
+import * as gameComponents from './helpers/gameComponents';
 
 jest.mock('node:readline/promises', () => {
   return {
@@ -9,17 +11,35 @@ jest.mock('node:readline/promises', () => {
 });
 
 describe('Snakes and Ladders', () => {
-  let runGameMock: jest.SpyInstance;
-  let someoneHasWonMock: jest.SpyInstance;
-  
-  
+  let someoneHasWonSpy: jest.SpyInstance;
+  let runGameSpy: jest.SpyInstance;
+  let rollDiceSpy: jest.SpyInstance;
+  let updatePosition: jest.SpyInstance;
+
+  const grid = gameComponents.makeGrid();
+  const snakes = [
+    [36, 6],
+    [32, 10],
+    [18, 62]
+  ];
+  const ladders = [
+    [3, 38],
+    [4, 14],
+    [8, 10]
+  ];
+
   beforeEach(() => {
-    someoneHasWonMock = jest.spyOn(snakesAndLadders, 'someoneHasWon');;
-    runGameMock = jest.spyOn(snakesAndLadders, 'runGame');
+    someoneHasWonSpy = jest.spyOn(snakesAndLadders, 'someoneHasWon');
+    runGameSpy = jest.spyOn(snakesAndLadders, 'runGame');
+    rollDiceSpy = jest
+      .spyOn(gameComponents, 'rollDice')
+      .mockImplementation(() => 1);
+    updatePosition = jest.spyOn(gameComponents, 'updatePosition');
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.resetModules();
   });
 
   it('has an entry point', () => {
@@ -27,48 +47,209 @@ describe('Snakes and Ladders', () => {
     expect(typeof SnakesAndLadders).toBe('function');
   });
 
-  it('accepts a user object and the initial game data', async () => {
-    const grid = [1, 2, 3, 4, 5, 6];
-    const snakes = [
-      [36, 6],
-      [32, 10],
-      [18, 62]
-    ];
-    const ladders = [
-      [1, 38],
-      [4, 14],
-      [8, 10]
-    ];
-    const gameObjectMock = {
-      grid,
-      snakes,
-      ladders
-    };
+  describe('Game', () => {
+    it('accepts a user object and the initial game data', async () => {
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
 
-    const rl = {
-      question: jest
-        .fn()
-        .mockResolvedValueOnce('Dineshraj')
-        .mockResolvedValueOnce('Chloe'),
-      write: jest.fn()
-    } as unknown as Interface;
+      const rl = {
+        question: jest
+          .fn()
+          .mockResolvedValueOnce('Dineshraj')
+          .mockResolvedValueOnce('Doneshraj'),
+        write: jest.fn()
+      } as unknown as Interface;
 
-    jest.mocked(readline.createInterface).mockReturnValue(rl);
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
 
-    someoneHasWonMock.mockReturnValueOnce(true)
+      someoneHasWonSpy.mockReturnValueOnce(true);
 
-    const playerMock = [
-      { name: 'Dineshraj', position: 0 },
-      { name: 'Chloe', position: 0 }
-    ];
+      const playerMock = [
+        { name: 'Dineshraj', position: 1 },
+        { name: 'Doneshraj', position: 1 }
+      ];
 
-    await SnakesAndLadders(gameObjectMock);
+      await SnakesAndLadders(gameObjectMock);
 
-    expect(runGameMock).toHaveBeenCalledWith(playerMock, gameObjectMock);
-  });
+      expect(runGameSpy).toHaveBeenCalledWith(playerMock, gameObjectMock, rl);
+    });
 
-  it('returns the correct value from the someoneHasWon function', () => {
-    const value = someoneHasWon(true);
-    expect(value).toBe(true);
+    it('takes the players turn when they press p', async () => {
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
+
+      const rl = {
+        question: jest.fn().mockResolvedValueOnce('p'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      rollDiceSpy.mockReturnValueOnce(4);
+
+      someoneHasWonSpy
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true);
+
+      const playerMock = [
+        { name: 'Dineshraj', position: 1 },
+        { name: 'Doneshraj', position: 1 }
+      ];
+
+      await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
+
+      expect(rl.write).toHaveBeenCalledWith(`${YOUR_MOVE} Dineshraj\n`);
+      expect(rl.write).toHaveBeenCalledWith(`${ROLL} 4`);
+      expect(rl.write).toHaveBeenCalledWith(`${YOUR_MOVE} Doneshraj\n`);
+    });
+
+    it('does not take the turn if the player does not press p', async () => {
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
+
+      const rl = {
+        question: jest.fn().mockResolvedValueOnce('peepee'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      someoneHasWonSpy
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true);
+
+      const playerMock = [
+        { name: 'Dineshraj', position: 0 },
+        { name: 'Doneshraj', position: 0 }
+      ];
+
+      await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
+
+      expect(rl.write).toHaveBeenCalledWith(MORON);
+    });
+
+    it('takes the player up a ladder if they get to that position', async () => {
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
+
+      const rl = {
+        question: jest.fn().mockResolvedValueOnce('p'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      rollDiceSpy.mockReturnValueOnce(3);
+
+      someoneHasWonSpy.mockReturnValueOnce(false).mockReturnValueOnce(true);
+
+      const playerMock = [
+        { name: 'Dineshraj', position: 1 },
+        { name: 'Doneshraj', position: 1 }
+      ];
+
+      await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
+
+      expect(updatePosition).toHaveBeenCalledWith(
+        3,
+        playerMock[0],
+        ladders,
+        snakes
+      );
+
+      expect(updatePosition).toHaveReturnedWith(14);
+    });
+
+    it('takes the player down a snake if they get to that position', async () => {
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
+
+      const rl = {
+        question: jest.fn().mockResolvedValueOnce('p'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      rollDiceSpy.mockReturnValueOnce(1);
+
+      someoneHasWonSpy.mockReturnValueOnce(false).mockReturnValueOnce(true);
+
+      const playerMock = [
+        { name: 'Dineshraj', position: 35 },
+        { name: 'Doneshraj', position: 1 }
+      ];
+
+      await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
+
+      expect(updatePosition).toHaveBeenCalledWith(
+        1,
+        playerMock[0],
+        ladders,
+        snakes
+      );
+
+      expect(updatePosition).toHaveReturnedWith(6);
+    });
+
+    it('declares a winner if a player gets to 100', async () => {
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
+
+      const rl = {
+        question: jest
+          .fn()
+          .mockResolvedValueOnce('Dineshraj')
+          .mockResolvedValueOnce('Doneshraj')
+          .mockResolvedValueOnce('p'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      rollDiceSpy.mockReturnValueOnce(1);
+
+      const playerMock = [
+        { name: 'Dineshraj', position: 99 },
+        { name: 'Doneshraj', position: 1 }
+      ];
+
+      await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
+
+      expect(rl.write).toHaveBeenCalledWith(`${WINNER}`);
+    });
+
+    describe('someoneHasWon', () => {
+      it('returns the correct value', () => {
+        const value = someoneHasWon(true);
+        expect(value).toBe(true);
+      });
+
+      it('default to the correct value', () => {
+        const value = someoneHasWon();
+        expect(value).toBe(false);
+      });
+    });
   });
 });
