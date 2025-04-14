@@ -4,8 +4,10 @@
   "description": "Implementation of this classic game using vanilla javascript.",
   "main": "./src/index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --forceExit",
-    "test:watch": "npm test -- --watch --detectOpenHandles --forceExit"
+    "start": "node ./dist/src/run.js",
+    "build": "tsc",
+    "test": "jest --detectOpenHandles",
+    "test:watch": "npm test -- --watch"
   },
   "keywords": [],
   "author": "",
