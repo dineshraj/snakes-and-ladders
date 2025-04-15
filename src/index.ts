@@ -1,14 +1,28 @@
 import * as readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { makeGrid, rollDice, updatePosition } from './helpers/gameComponents';
+import {
+  checkBounceBack,
+  makeGrid,
+  rollDice,
+  togglePlayer,
+  updatePosition
+} from './helpers/gameComponents';
 import { Game, Player } from './types';
-import { MORON, PLAY, ROLL, WINNER, YOUR_MOVE } from './lang';
+import {
+  MORON,
+  NEW_POSITION,
+  PLAY,
+  PLAYER,
+  ROLL,
+  WINNER,
+  YOUR_MOVE
+} from './lang';
 
-const GRID = makeGrid();
+export const GRID = makeGrid();
 
 // these will be randomised in the future
 // current copied from https://www.ymimports.com/pages/how-to-play-snakes-and-ladders
-const SNAKES = [
+export const SNAKES = [
   [36, 6],
   [32, 10],
   [18, 62],
@@ -18,8 +32,8 @@ const SNAKES = [
   [78, 97]
 ];
 
-const LADDERS = [
-  [1, 38],
+export const LADDERS = [
+  [2, 38],
   [4, 14],
   [8, 10],
   [21, 42],
@@ -48,36 +62,51 @@ export const runGame = async (
     if (play === 'p') {
       const diceRoll = rollDice();
 
-      rl.write(`${ROLL} ${diceRoll}`);
+      rl.write(`${ROLL} ${diceRoll}\n`);
+      const oldPosition = currentPlayer.position;
 
       currentPlayer.position = updatePosition(
         diceRoll,
         currentPlayer,
         ladders,
-        snakes
+        snakes,
+        rl
       );
+
+      currentPlayer.position = checkBounceBack(
+        GRID,
+        oldPosition,
+        currentPlayer.position,
+        rl
+      );
+
+      rl.write(`${NEW_POSITION} ${currentPlayer.position}\n\n`);
 
       // winning condition
       if (currentPlayer.position === 100) {
         rl.write(WINNER);
-        someoneHasWon(true);
-        break;
+        return;
+      } else {
+        // update player index for the next move
+        player = togglePlayer(player);
       }
-      // update player index for the next move
-      player = player === 0 ? 1 : 0;
     } else {
       rl.write(MORON);
     }
   }
+  return;
 };
 
 const SnakesAndLadders = async (
   gameObject: Game = { grid: GRID, snakes: SNAKES, ladders: LADDERS }
 ) => {
-  const rl = readline.createInterface(input, output);
+  const rl = readline.createInterface({
+    input,
+    output
+  });
 
-  const playerOne = await rl.question('what is your name player one?');
-  const playerTwo = await rl.question('what is your name player two?');
+  const playerOne = await rl.question(`${PLAYER} one? `);
+  const playerTwo = await rl.question(`${PLAYER} two? `);
 
   await runGame(
     [
@@ -87,8 +116,6 @@ const SnakesAndLadders = async (
     gameObject,
     rl
   );
-
-  // to stop the input handler staying open
   input.destroy();
 };
 

@@ -1,15 +1,19 @@
+import { Interface } from 'readline/promises';
 import {
   ladderCheck,
   snakeCheck,
   makeGrid,
   rollDice,
-  updatePosition
+  updatePosition,
+  togglePlayer,
+  checkBounceBack
 } from '../src/helpers/gameComponents';
+import * as gameComponents from '../src/helpers/gameComponents';
 
-describe('GameComonents', () => {
+describe('GameComponents', () => {
   beforeEach(() => {
     jest.spyOn(Math, 'random').mockReturnValue(0.3);
-    jest.spyOn(Math, 'round').mockReturnValue(2);
+    jest.spyOn(Math, 'ceil').mockReturnValue(2);
   });
 
   afterEach(() => {
@@ -33,11 +37,22 @@ describe('GameComonents', () => {
   it('uses math.random to generate a number', () => {
     const diceRoll = rollDice();
     expect(Math.random).toHaveReturnedWith(0.3);
-    expect(Math.round).toHaveBeenCalledWith(2.1);
+    expect(Math.ceil).toHaveBeenCalledWith(2.1);
     expect(diceRoll).toBe(2);
   });
 
-  describe('ladders', () => {
+  describe('bounceBack()', () => {
+    it('bounces back if the dice roll leads to a total above 100', () => {
+      const newPosition = checkBounceBack(makeGrid(), 99, 105, { write: jest.fn() } as unknown as Interface);
+      const expectedPosition = 95;
+
+      expect(newPosition).toBe(expectedPosition);
+    });
+
+    it('does not bounce back if the dice roll leads to a total below 100', () => {});
+  });
+
+  describe('ladderCheck', () => {
     it('return position to move to if you are at the bottom of a ladder', () => {
       const ladders = [[1, 38]];
       const newPosition = 1;
@@ -55,7 +70,7 @@ describe('GameComonents', () => {
     });
   });
 
-  describe('snakes', () => {
+  describe('snakeCheck', () => {
     it('return position to move to if you are at the head of a snake', () => {
       const snakes = [[38, 22]];
       const newPosition = 38;
@@ -73,30 +88,66 @@ describe('GameComonents', () => {
     });
   });
 
-  it('updates the position of a player given the dice roll on an empty square', () => {
-    const roll = 4;
-    const player = { name: 'mrpoopybutthole', position: 69 };
-    const expectedPosition = 73;
-    const updatedPlayerPosition = updatePosition(roll, player, [], []);
+  describe('updatePosition()', () => {
+    it('updates the position of a player given the dice roll on an empty square', () => {
+      const roll = 4;
+      const player = { name: 'mrpoopybutthole', position: 69 };
+      const expectedPosition = 73;
+      const updatedPlayerPosition = updatePosition(roll, player, [], [], {
+        question: jest.fn(),
+        write: jest.fn()
+      } as unknown as Interface);
 
-    expect(updatedPlayerPosition).toBe(expectedPosition);
+      expect(updatedPlayerPosition).toBe(expectedPosition);
+    });
+
+    it('updates the position of a player given the dice roll on a ladder square', () => {
+      const roll = 4;
+      const player = { name: 'mrpoopybutthole', position: 69 };
+      const updatedPlayerPosition = updatePosition(
+        roll,
+        player,
+        [[73, 87]],
+        [],
+        {
+          question: jest.fn(),
+          write: jest.fn()
+        } as unknown as Interface
+      );
+      const expectedPosition = 87;
+
+      expect(updatedPlayerPosition).toStrictEqual(expectedPosition);
+    });
+
+    it('updates the position of a player given the dice roll on a snake square', () => {
+      const roll = 4;
+      const player = { name: 'mrpoopybutthole', position: 69 };
+      const updatedPlayerPosition = updatePosition(
+        roll,
+        player,
+        [],
+        [[73, 14]],
+        {
+          question: jest.fn(),
+          write: jest.fn()
+        } as unknown as Interface
+      );
+      const expectedPosition = 14;
+
+      expect(updatedPlayerPosition).toStrictEqual(expectedPosition);
+    });
   });
 
-  it('updates the position of a player given the dice roll on a ladder square', () => {
-    const roll = 4;
-    const player = { name: 'mrpoopybutthole', position: 69 };
-    const updatedPlayerPosition = updatePosition(roll, player, [[73, 87]], []);
-    const expectedPosition = 87;
+  describe('togglePlayer()', () => {
+    it('changes the current player after a completed go', () => {
+      let currentPlayerIndex = 0;
+      let newPlayerIndex = togglePlayer(currentPlayerIndex);
 
-    expect(updatedPlayerPosition).toStrictEqual(expectedPosition);
-  });
+      expect(newPlayerIndex).toBe(1);
 
-  it('updates the position of a player given the dice roll on a snake square', () => {
-    const roll = 4;
-    const player = { name: 'mrpoopybutthole', position: 69 };
-    const updatedPlayerPosition = updatePosition(roll, player, [], [[73, 14]]);
-    const expectedPosition = 14;
-
-    expect(updatedPlayerPosition).toStrictEqual(expectedPosition);
+      currentPlayerIndex = 1;
+      newPlayerIndex = togglePlayer(currentPlayerIndex);
+      expect(newPlayerIndex).toBe(0);
+    });
   });
 });

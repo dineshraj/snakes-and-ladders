@@ -1,3 +1,4 @@
+import { Interface } from 'readline/promises';
 import { Player } from '../types';
 
 export const makeGrid = (size: number = 10) => {
@@ -10,7 +11,11 @@ export const makeGrid = (size: number = 10) => {
 
 export const rollDice = () => {
   const diceValue = 6 + 1;
-  return Math.round(Math.random() * diceValue);
+  return Math.ceil(Math.random() * diceValue);
+};
+
+export const togglePlayer = (index: number) => {
+  return index === 0 ? 1 : 0;
 };
 
 export const ladderCheck = (newPosition: number, ladders: number[][]) => {
@@ -29,18 +34,44 @@ export const updatePosition = (
   roll: number,
   player: Player,
   ladders: number[][],
-  snakes: number[][]
+  snakes: number[][],
+  rl: Interface
 ) => {
   let newPosition = roll + player.position;
   const goingUpALadder = ladderCheck(newPosition, ladders);
   const goingDownSnake = snakeCheck(newPosition, snakes);
-
   if (goingUpALadder) {
+    rl.write(
+      `Woo, you are going up a ladder from ${newPosition} to ${goingUpALadder}\n`
+    );
     newPosition = goingUpALadder;
   } else if (goingDownSnake) {
+    rl.write(
+      `Lol, you got eaten by a snake dumbass, you have gone from ${newPosition} to ${goingDownSnake}\n`
+    );
     newPosition = goingDownSnake;
   }
-  return newPosition
+  return newPosition;
+};
+
+export const checkBounceBack = (
+  grid: number[],
+  oldPostion: number,
+  newPosition: number,
+  rl: Interface
+) => {
+  const winningGridValue = grid.length;
+  if (newPosition > winningGridValue) {
+    const howMuchOverWin = newPosition - winningGridValue;
+    const howMuchUnderWinBefore = winningGridValue - oldPostion;
+
+    const bounceBackPosition =
+      oldPostion + howMuchUnderWinBefore - howMuchOverWin;
+    rl.write(`oh no you bounced back cause your ass rolled too much`);
+
+    return bounceBackPosition;
+  }
+  return newPosition;
 };
 
 /*

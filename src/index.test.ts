@@ -1,7 +1,12 @@
-import SnakesAndLadders, { someoneHasWon } from '../src/.';
+import SnakesAndLadders, {
+  someoneHasWon,
+  GRID,
+  SNAKES,
+  LADDERS
+} from '../src/.';
 import * as snakesAndLadders from '../src/.';
 import readline, { Interface } from 'node:readline/promises';
-import { MORON, ROLL, WINNER, YOUR_MOVE } from './lang';
+import { MORON, NEW_POSITION, ROLL, WINNER, YOUR_MOVE } from './lang';
 import * as gameComponents from './helpers/gameComponents';
 
 jest.mock('node:readline/promises', () => {
@@ -77,6 +82,43 @@ describe('Snakes and Ladders', () => {
       expect(runGameSpy).toHaveBeenCalledWith(playerMock, gameObjectMock, rl);
     });
 
+    it('defaults to the in-game grid and snakes and ladders', async () => {
+      const rl = {
+        question: jest
+          .fn()
+          .mockReturnValueOnce('Dee')
+          .mockReturnValueOnce('Doo'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      someoneHasWonSpy.mockReturnValueOnce(true);
+
+      const playerMock = [
+        {
+          name: 'Dee',
+          position: 1
+        },
+        {
+          name: 'Doo',
+          position: 1
+        }
+      ];
+
+      await SnakesAndLadders();
+
+      expect(snakesAndLadders.runGame).toHaveBeenCalledWith(
+        playerMock,
+        {
+          grid: GRID,
+          snakes: SNAKES,
+          ladders: LADDERS
+        },
+        rl
+      );
+    });
+
     it('takes the players turn when they press p', async () => {
       const gameObjectMock = {
         grid,
@@ -107,7 +149,7 @@ describe('Snakes and Ladders', () => {
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
 
       expect(rl.write).toHaveBeenCalledWith(`${YOUR_MOVE} Dineshraj\n`);
-      expect(rl.write).toHaveBeenCalledWith(`${ROLL} 4`);
+      expect(rl.write).toHaveBeenCalledWith(`${ROLL} 4\n`);
       expect(rl.write).toHaveBeenCalledWith(`${YOUR_MOVE} Doneshraj\n`);
     });
 
@@ -140,6 +182,32 @@ describe('Snakes and Ladders', () => {
       expect(rl.write).toHaveBeenCalledWith(MORON);
     });
 
+    it('tells you your new position on the grid', async () => {
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
+
+      const rl = {
+        question: jest.fn().mockResolvedValueOnce('p'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      someoneHasWonSpy.mockReturnValueOnce(false).mockReturnValueOnce(true);
+
+      const playerMock = [
+        { name: 'Dineshraj', position: 68 },
+        { name: 'Doneshraj', position: 1 }
+      ];
+
+      await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
+
+      expect(rl.write).toHaveBeenCalledWith(`${NEW_POSITION} 69\n\n`);
+    });
+
     it('takes the player up a ladder if they get to that position', async () => {
       const gameObjectMock = {
         grid,
@@ -169,7 +237,8 @@ describe('Snakes and Ladders', () => {
         3,
         playerMock[0],
         ladders,
-        snakes
+        snakes,
+        expect.any(Object)
       );
 
       expect(updatePosition).toHaveReturnedWith(14);
@@ -204,7 +273,8 @@ describe('Snakes and Ladders', () => {
         1,
         playerMock[0],
         ladders,
-        snakes
+        snakes,
+        expect.any(Object)
       );
 
       expect(updatePosition).toHaveReturnedWith(6);
