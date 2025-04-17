@@ -47,7 +47,7 @@ export const updatePosition = (
     newPosition = goingUpALadder;
   } else if (goingDownSnake) {
     rl.write(
-      `Lol, you got eaten by a snake dumbass, you have gone from ${newPosition} to ${goingDownSnake}\n`
+      `Lol, you got eaten by a snake you actual fuck, you have gone from ${newPosition} to ${goingDownSnake}\n`
     );
     newPosition = goingDownSnake;
   }
@@ -67,27 +67,62 @@ export const checkBounceBack = (
 
     const bounceBackPosition =
       oldPostion + howMuchUnderWinBefore - howMuchOverWin;
-    rl.write(`oh no you bounced back cause your ass rolled too much`);
+    rl.write(
+      `oh no you bounced back to ${bounceBackPosition} cause your ass rolled too much`
+    );
 
     return bounceBackPosition;
   }
   return newPosition;
 };
 
-/*
-  NOT DOING THIS FOR NOW AS THE USER CAN PLAY WITHOUT THE GRID
-  
-  export const printGrid = (grid: number[]) => {
-    loop through the grid and if mod 10 is 0 then
-    add a new line character and do the next, until you are at the end.
-    DONT FORGET on every even row the order needs to be reversed
-    DONT FORGET you need to start from the bottom
+export const amIOdd = (value: number) => {
+  return value % 2 !== 0;
+};
 
-    e.g.:
-    21 22 23 24 25
-    20 19 18 17 16
-    11 12 13 14 15
-    10  9  8  7  6  
-    1  2   3  4  5
-}
-*/
+export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
+  const preparedArray: (string | number)[][] = [];
+  const reversedGrid = grid.reverse();
+  const gridWidth = Math.sqrt(reversedGrid.length);
+  let gridLine: (number | string)[] = [];
+  let line = 0;
+
+  for (let i = 0; i < reversedGrid.length; i++) {
+    gridLine.push(reversedGrid[i]);
+
+    // make a function
+    const playersAtCurrentPosition = players.filter((player) => {
+      if (player.position === reversedGrid.length - (i + 1)) {
+        return player;
+      }
+    });
+
+    if (playersAtCurrentPosition.length === 1) {
+      gridLine[gridLine.length] = playersAtCurrentPosition[0].symbol;
+      i++;
+    } else if (playersAtCurrentPosition.length === 2) {
+      gridLine[gridLine.length] =
+        `${playersAtCurrentPosition[0].symbol}/${playersAtCurrentPosition[1].symbol}`;
+      i++;
+    }
+
+    if ((i + 1) % gridWidth === 0) {
+      if (amIOdd(line)) {
+        gridLine.reverse();
+      }
+      preparedArray.push(gridLine);
+      gridLine = [];
+      line++;
+    }
+  }
+
+  return preparedArray;
+};
+
+export const printGrid = (grid: number[], players: Player[]) => {
+  const preparedGrid = prepareGridForPrinting(grid, players);
+
+  const printableGrid = preparedGrid.map((line) => line.join(' ')).join('\n');
+
+  return printableGrid;
+};

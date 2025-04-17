@@ -6,7 +6,10 @@ import {
   rollDice,
   updatePosition,
   togglePlayer,
-  checkBounceBack
+  checkBounceBack,
+  printGrid,
+  prepareGridForPrinting,
+  amIOdd
 } from '../src/helpers/gameComponents';
 import * as gameComponents from '../src/helpers/gameComponents';
 
@@ -32,7 +35,64 @@ describe('GameComponents', () => {
     expect(grid).toStrictEqual(expectedGrid);
   });
 
-  it.skip('prints out the grid in the correct format', () => {});
+  it('tells you if a number is odd or even', () => {
+    let isOdd = amIOdd(40);
+    expect(isOdd).toBe(false);
+
+    isOdd = amIOdd(41);
+    expect(isOdd).toBe(true);
+  });
+
+  describe('visualising the grid', () => {
+    it('structures the array in the correct way ready for printing and includes the player position', () => {
+      const playerMock = [
+        { name: 'Dineshraj', position: 3, symbol: 'D' },
+        { name: 'Ooneshraj', position: 10, symbol: 'O' }
+      ];
+      const grid = makeGrid(6);
+      const expectedOutput = [
+        [36, 35, 34, 33, 32, 31],
+        [25, 26, 27, 28, 29, 30],
+        [24, 23, 22, 21, 20, 19],
+        [13, 14, 15, 16, 17, 18],
+        [12, 11, 'O', 9, 8, 7],
+        [1, 2, 'D', 4, 5, 6]
+      ];
+      const printedGrid = prepareGridForPrinting(grid, playerMock);
+
+      expect(printedGrid).toStrictEqual(expectedOutput);
+    });
+
+    it('accounts for players being on the same square', () => {
+      const playerMock = [
+        { name: 'Dineshraj', position: 10, symbol: 'D' },
+        { name: 'Ooneshraj', position: 10, symbol: 'O' }
+      ];
+      const grid = makeGrid(6);
+      const expectedOutput = [
+        [36, 35, 34, 33, 32, 31],
+        [25, 26, 27, 28, 29, 30],
+        [24, 23, 22, 21, 20, 19],
+        [13, 14, 15, 16, 17, 18],
+        [12, 11, 'D/O', 9, 8, 7],
+        [1, 2, 3, 4, 5, 6]
+      ];
+      const printedGrid = prepareGridForPrinting(grid, playerMock);
+
+      expect(printedGrid).toStrictEqual(expectedOutput);
+    });
+
+    it('prints out the grid in the correct format', () => {
+      const playerMock = [
+        { name: 'Dineshraj', position: 3, symbol: 'D' },
+        { name: 'Ooneshraj', position: 10, symbol: 'O' }
+      ];
+      const grid = makeGrid(4);
+      const expectedOutput = '16 15 14 13\n9 O 11 12\n8 7 6 5\n1 2 D 4';
+      const printedGrid = printGrid(grid, playerMock);
+      expect(printedGrid).toStrictEqual(expectedOutput);
+    });
+  });
 
   it('uses math.random to generate a number', () => {
     const diceRoll = rollDice();
@@ -43,13 +103,22 @@ describe('GameComponents', () => {
 
   describe('bounceBack()', () => {
     it('bounces back if the dice roll leads to a total above 100', () => {
-      const newPosition = checkBounceBack(makeGrid(), 99, 105, { write: jest.fn() } as unknown as Interface);
+      const newPosition = checkBounceBack(makeGrid(), 99, 105, {
+        write: jest.fn()
+      } as unknown as Interface);
       const expectedPosition = 95;
 
       expect(newPosition).toBe(expectedPosition);
     });
 
-    it('does not bounce back if the dice roll leads to a total below 100', () => {});
+    it('does not bounce back if the dice roll leads to a total below 100', () => {
+      const newPosition = checkBounceBack(makeGrid(), 69, 10, {
+        write: jest.fn()
+      } as unknown as Interface);
+      const expectedPosition = 10;
+
+      expect(newPosition).toBe(expectedPosition);
+    });
   });
 
   describe('ladderCheck', () => {
@@ -91,7 +160,7 @@ describe('GameComponents', () => {
   describe('updatePosition()', () => {
     it('updates the position of a player given the dice roll on an empty square', () => {
       const roll = 4;
-      const player = { name: 'mrpoopybutthole', position: 69 };
+      const player = { name: 'mrpoopybutthole', position: 69, symbol: 'm' };
       const expectedPosition = 73;
       const updatedPlayerPosition = updatePosition(roll, player, [], [], {
         question: jest.fn(),
@@ -103,7 +172,7 @@ describe('GameComponents', () => {
 
     it('updates the position of a player given the dice roll on a ladder square', () => {
       const roll = 4;
-      const player = { name: 'mrpoopybutthole', position: 69 };
+      const player = { name: 'mrpoopybutthole', position: 69, symbol: 'm' };
       const updatedPlayerPosition = updatePosition(
         roll,
         player,
@@ -121,7 +190,7 @@ describe('GameComponents', () => {
 
     it('updates the position of a player given the dice roll on a snake square', () => {
       const roll = 4;
-      const player = { name: 'mrpoopybutthole', position: 69 };
+      const player = { name: 'mrpoopybutthole', position: 69, symbol: 'm' };
       const updatedPlayerPosition = updatePosition(
         roll,
         player,

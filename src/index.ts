@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from 'node:process';
 import {
   checkBounceBack,
   makeGrid,
+  printGrid,
   rollDice,
   togglePlayer,
   updatePosition
@@ -56,6 +57,7 @@ export const runGame = async (
 
   while (!someoneHasWon()) {
     const currentPlayer = players[player];
+    rl.write(`\n\n${printGrid(GRID, players)}\n\n`)
     rl.write(`${YOUR_MOVE} ${currentPlayer.name}\n`);
     const play = await rl.question(`${PLAY}`);
 
@@ -110,8 +112,8 @@ const SnakesAndLadders = async (
 
   await runGame(
     [
-      { name: playerOne, position: 1 },
-      { name: playerTwo, position: 1 }
+      { name: playerOne, position: 1, symbol: playerOne.charAt(0) },
+      { name: playerTwo, position: 1, symbol: playerTwo.charAt(0) }
     ],
     gameObject,
     rl

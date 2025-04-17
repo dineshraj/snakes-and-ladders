@@ -64,7 +64,7 @@ describe('Snakes and Ladders', () => {
         question: jest
           .fn()
           .mockResolvedValueOnce('Dineshraj')
-          .mockResolvedValueOnce('Doneshraj'),
+          .mockResolvedValueOnce('Ooneshraj'),
         write: jest.fn()
       } as unknown as Interface;
 
@@ -73,8 +73,8 @@ describe('Snakes and Ladders', () => {
       someoneHasWonSpy.mockReturnValueOnce(true);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 1 },
-        { name: 'Doneshraj', position: 1 }
+        { name: 'Dineshraj', position: 1, symbol: 'D' },
+        { name: 'Ooneshraj', position: 1, symbol: 'O' }
       ];
 
       await SnakesAndLadders(gameObjectMock);
@@ -87,7 +87,7 @@ describe('Snakes and Ladders', () => {
         question: jest
           .fn()
           .mockReturnValueOnce('Dee')
-          .mockReturnValueOnce('Doo'),
+          .mockReturnValueOnce('Ooo'),
         write: jest.fn()
       } as unknown as Interface;
 
@@ -98,11 +98,13 @@ describe('Snakes and Ladders', () => {
       const playerMock = [
         {
           name: 'Dee',
-          position: 1
+          position: 1,
+          symbol: 'D'
         },
         {
-          name: 'Doo',
-          position: 1
+          name: 'Ooo',
+          position: 1,
+          symbol: 'O'
         }
       ];
 
@@ -142,15 +144,15 @@ describe('Snakes and Ladders', () => {
         .mockReturnValueOnce(true);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 1 },
-        { name: 'Doneshraj', position: 1 }
+        { name: 'Dineshraj', position: 1, symbol: 'D' },
+        { name: 'Ooneshraj', position: 1, symbol: 'O' }
       ];
 
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
 
       expect(rl.write).toHaveBeenCalledWith(`${YOUR_MOVE} Dineshraj\n`);
       expect(rl.write).toHaveBeenCalledWith(`${ROLL} 4\n`);
-      expect(rl.write).toHaveBeenCalledWith(`${YOUR_MOVE} Doneshraj\n`);
+      expect(rl.write).toHaveBeenCalledWith(`${YOUR_MOVE} Ooneshraj\n`);
     });
 
     it('does not take the turn if the player does not press p', async () => {
@@ -173,8 +175,8 @@ describe('Snakes and Ladders', () => {
         .mockReturnValueOnce(true);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 0 },
-        { name: 'Doneshraj', position: 0 }
+        { name: 'Dineshraj', position: 0, symbol: 'D' },
+        { name: 'Ooneshraj', position: 0, symbol: 'O' }
       ];
 
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
@@ -199,8 +201,8 @@ describe('Snakes and Ladders', () => {
       someoneHasWonSpy.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 68 },
-        { name: 'Doneshraj', position: 1 }
+        { name: 'Dineshraj', position: 68, symbol: 'D' },
+        { name: 'Ooneshraj', position: 1, symbol: 'O' }
       ];
 
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
@@ -227,8 +229,8 @@ describe('Snakes and Ladders', () => {
       someoneHasWonSpy.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 1 },
-        { name: 'Doneshraj', position: 1 }
+        { name: 'Dineshraj', position: 1, symbol: 'D' },
+        { name: 'Ooneshraj', position: 1, symbol: 'O' }
       ];
 
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
@@ -263,8 +265,8 @@ describe('Snakes and Ladders', () => {
       someoneHasWonSpy.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 35 },
-        { name: 'Doneshraj', position: 1 }
+        { name: 'Dineshraj', position: 35, symbol: 'D' },
+        { name: 'Ooneshraj', position: 1, symbol: 'O' }
       ];
 
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
@@ -291,7 +293,7 @@ describe('Snakes and Ladders', () => {
         question: jest
           .fn()
           .mockResolvedValueOnce('Dineshraj')
-          .mockResolvedValueOnce('Doneshraj')
+          .mockResolvedValueOnce('Ooneshraj')
           .mockResolvedValueOnce('p'),
         write: jest.fn()
       } as unknown as Interface;
@@ -301,8 +303,8 @@ describe('Snakes and Ladders', () => {
       rollDiceSpy.mockReturnValueOnce(1);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 99 },
-        { name: 'Doneshraj', position: 1 }
+        { name: 'Dineshraj', position: 99, symbol: 'D' },
+        { name: 'Ooneshraj', position: 1, symbol: 'O' }
       ];
 
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
