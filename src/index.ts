@@ -22,15 +22,14 @@ import {
 export const GRID = makeGrid();
 
 // these will be randomised in the future
-// current copied from https://www.ymimports.com/pages/how-to-play-snakes-and-ladders
 export const SNAKES = [
   [36, 6],
   [32, 10],
-  [18, 62],
-  [24, 88],
-  [26, 48],
-  [56, 95],
-  [78, 97]
+  [18, 2],
+  [24, 8],
+  [26, 8],
+  [56, 15],
+  [78, 37]
 ];
 
 export const LADDERS = [
@@ -50,19 +49,23 @@ export const someoneHasWon = (value: boolean = false) => {
 
 export const runGame = async (
   players: Player[],
-  { snakes, ladders }: Game,
+  { grid, snakes, ladders }: Game,
   rl: readline.Interface
 ) => {
   let player = 0;
 
   while (!someoneHasWon()) {
+
+    
     const currentPlayer = players[player];
-    rl.write(`\n\n${printGrid(GRID, players)}\n\n`)
+    rl.write(`\n\n${printGrid(grid, players)}\n\n`)
     rl.write(`${YOUR_MOVE} ${currentPlayer.name}\n`);
     const play = await rl.question(`${PLAY}`);
 
+    console.log("🚀 ~ play:", play)
     if (play === 'p') {
       const diceRoll = rollDice();
+      console.log("🚀 ~ diceRoll:", diceRoll)
 
       rl.write(`${ROLL} ${diceRoll}\n`);
       const oldPosition = currentPlayer.position;
@@ -76,7 +79,7 @@ export const runGame = async (
       );
 
       currentPlayer.position = checkBounceBack(
-        GRID,
+        grid,
         oldPosition,
         currentPlayer.position,
         rl

@@ -81,8 +81,9 @@ export const amIOdd = (value: number) => {
 };
 
 export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
+  console.log("🚀 ~ prepareGridForPrinting ~ players:", players)
   const preparedArray: (string | number)[][] = [];
-  const reversedGrid = grid.reverse();
+  const reversedGrid = [...grid].reverse();
   const gridWidth = Math.sqrt(reversedGrid.length);
   let gridLine: (number | string)[] = [];
   let line = 0;
@@ -116,6 +117,7 @@ export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
     }
   }
 
+  console.log("🚀 ~ prepareGridForPrinting ~ preparedArray:", preparedArray)
   return preparedArray;
 };
 

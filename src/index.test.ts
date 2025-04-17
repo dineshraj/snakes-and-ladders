@@ -312,6 +312,46 @@ describe('Snakes and Ladders', () => {
       expect(rl.write).toHaveBeenCalledWith(`${WINNER}`);
     });
 
+    it('prints out the grid after every turn', async () => {
+      const printedGridSpy = jest.spyOn(gameComponents, 'printGrid');
+      const grid = gameComponents.makeGrid(4);
+      const gameObjectMock = {
+        grid,
+        snakes,
+        ladders
+      };
+      const rl = {
+        question: jest
+          .fn()
+          .mockResolvedValueOnce('p')
+          .mockResolvedValueOnce('p'),
+        write: jest.fn()
+      } as unknown as Interface;
+
+      jest.mocked(readline.createInterface).mockReturnValue(rl);
+
+      someoneHasWonSpy
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true);
+
+      const playerMock = [
+        { name: 'Dineshraj', position: 1, symbol: 'D' },
+        { name: 'Ooneshraj', position: 1, symbol: 'O' }
+      ];
+
+      rollDiceSpy.mockReturnValueOnce(1).mockReturnValueOnce(1);
+
+      const expectedFirstOutput = '16 15 14 13\n9 10 11 12\n8 7 6 5\nD/O 2 3 4';
+      const expectedSecondOutput = '16 15 14 13\n9 10 11 12\n8 7 6 5\n1 D 3 4';
+
+      await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
+
+      expect(printedGridSpy).toHaveReturnedWith(expectedFirstOutput);
+      expect(printedGridSpy).toHaveReturnedWith(expectedSecondOutput);
+    });
+
     describe('someoneHasWon', () => {
       it('returns the correct value', () => {
         const value = someoneHasWon(true);
