@@ -6,7 +6,7 @@ describe('stuffNoOneCaresAbout', () => {
     it('pads out an item so they all have three characters', () => {
       const grid = makeGrid(4);
       const paddedItem = padItem(grid[0]);
-      const expectedItem = '  1';
+      const expectedItem = '    1';
 
       expect(paddedItem).toBe(expectedItem);
     });
@@ -17,7 +17,7 @@ describe('stuffNoOneCaresAbout', () => {
       const grid = makeGrid(2);
       const paddedArray = padArrayItems(grid);
 
-      const expectedArray = ['  1', '  2', '  3', '  4'];
+      const expectedArray = ['    1', '    2', '    3', '    4'];
 
       expect(paddedArray).toStrictEqual(expectedArray);
     });

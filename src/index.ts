@@ -54,9 +54,9 @@ export const runGame = async (
 ) => {
   let player = 0;
 
-  while (!someoneHasWon()) {    
+  while (!someoneHasWon()) {
     const currentPlayer = players[player];
-    rl.write(`\n\n${printGrid(grid, players)}\n\n`)
+    rl.write(`\n\n${printGrid(grid, players)}\n\n`);
     rl.write(`${YOUR_MOVE} ${currentPlayer.name}\n`);
     const play = await rl.question(`${PLAY}`);
 
@@ -102,6 +102,11 @@ const SnakesAndLadders = async (
   const rl = readline.createInterface({
     input,
     output
+    // this is commented out because you need to use
+    // console.log rather than rl.write
+    // but this does give you the opportunity to
+    // colour the output
+    // terminal: false
   });
 
   const playerOne = await rl.question(`${PLAYER} one? `);
@@ -109,8 +114,8 @@ const SnakesAndLadders = async (
 
   await runGame(
     [
-      { name: playerOne, position: 1, symbol: '1' },
-      { name: playerTwo, position: 1, symbol: '2' }
+      { name: playerOne, position: 1, symbol: `${playerOne.charAt(0)}1` },
+      { name: playerTwo, position: 1, symbol: `${playerTwo.charAt(0)}2` }
     ],
     gameObject,
     rl

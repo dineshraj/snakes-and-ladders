@@ -8,7 +8,7 @@ import {
   togglePlayer,
   checkBounceBack,
   printGrid,
-  prepareGridForPrinting,
+  prepareGridForPrinting
 } from '../src/helpers/gameComponents';
 
 const padThoseMotherFuckingArrayItemsOfArrays = (
@@ -50,12 +50,31 @@ describe('GameComponents', () => {
       ];
       const grid = makeGrid(6);
       const expectedOutput = [
-        [' 36', ' 35', ' 34', ' 33', ' 32', ' 31'],
-        [' 25', ' 26', ' 27', ' 28', ' 29', ' 30'],
-        [' 24', ' 23', ' 22', ' 21', ' 20', ' 19'],
-        [' 13', ' 14', ' 15', ' 16', ' 17', ' 18'],
-        [' 12', ' 11', '  O', '  9', '  8', '  7'],
-        ['  1', '  2', '  D', '  4', '  5', '  6']
+        ['   36', '   35', '   34', '   33', '   32', '   31'],
+        ['   25', '   26', '   27', '   28', '   29', '   30'],
+        ['   24', '   23', '   22', '   21', '   20', '   19'],
+        ['   13', '   14', '   15', '   16', '   17', '   18'],
+        ['   12', '   11', '\x1b[32m    O\x1b[0m', '    9', '    8', '    7'],
+        ['    1', '    2', '\x1b[32m    D\x1b[0m', '    4', '    5', '    6']
+      ];
+      const printedGrid = prepareGridForPrinting(grid, playerMock);
+
+      expect(printedGrid).toStrictEqual(expectedOutput);
+    });
+
+    it('structures the array in the correct way ready for printing when the player is at the start of a line', () => {
+      const playerMock = [
+        { name: 'Dineshraj', position: 24, symbol: 'D' },
+        { name: 'Ooneshraj', position: 12, symbol: 'O' }
+      ];
+      const grid = makeGrid(6);
+      const expectedOutput = [
+        ['   36', '   35', '   34', '   33', '   32', '   31'],
+        ['   25', '   26', '   27', '   28', '   29', '   30'],
+        ['\x1b[32m    D\x1b[0m', '   23', '   22', '   21', '   20', '   19'],
+        ['   13', '   14', '   15', '   16', '   17', '   18'],
+        ['\x1b[32m    O\x1b[0m', '   11', '   10', '    9', '    8', '    7'],
+        ['    1', '    2', '    3', '    4', '    5', '    6']
       ];
       const printedGrid = prepareGridForPrinting(grid, playerMock);
 
@@ -69,12 +88,12 @@ describe('GameComponents', () => {
       ];
       const grid = makeGrid(6);
       const expectedOutput = [
-        [' 36', ' 35', ' 34', ' 33', ' 32', ' 31'],
-        [' 25', ' 26', ' 27', ' 28', ' 29', ' 30'],
-        [' 24', ' 23', ' 22', ' 21', ' 20', ' 19'],
-        [' 13', ' 14', ' 15', ' 16', ' 17', ' 18'],
-        [' 12', ' 11', 'D/O', '  9', '  8', '  7'],
-        ['  1', '  2', '  3', '  4', '  5', '  6']
+        ['   36', '   35', '   34', '   33', '   32', '   31'],
+        ['   25', '   26', '   27', '   28', '   29', '   30'],
+        ['   24', '   23', '   22', '   21', '   20', '   19'],
+        ['   13', '   14', '   15', '   16', '   17', '   18'],
+        ['   12', '   11', '\x1B[32m  D/O\x1B[0m', '    9', '    8', '    7'],
+        ['    1', '    2', '    3', '    4', '    5', '    6']
       ];
       const printedGrid = prepareGridForPrinting(grid, playerMock);
 
@@ -87,8 +106,10 @@ describe('GameComponents', () => {
         { name: 'Ooneshraj', position: 10, symbol: 'O' }
       ];
       const grid = makeGrid(4);
+
       const expectedOutput =
-        ' 16  15  14  13\n  9   O  11  12\n  8   7   6   5\n  1   2   D   4';
+        '   16    15    14    13\n    9 \u001b[32m    O\u001b[0m    11    12\n    8     7     6     5\n    1     2 \u001b[32m    D\u001b[0m     4';
+
       const printedGrid = printGrid(grid, playerMock);
       expect(printedGrid).toStrictEqual(expectedOutput);
     });

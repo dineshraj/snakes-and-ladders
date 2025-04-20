@@ -1,6 +1,6 @@
 import { Interface } from 'readline/promises';
 import { Player } from '../types';
-import { padArrayItems, amIOdd } from './stuffNoOneCaresAbout';
+import { padArrayItems, amIOdd, padItem } from './stuffNoOneCaresAbout';
 
 export const makeGrid = (size: number = 10) => {
   const gridLength = size ** 2;
@@ -11,8 +11,9 @@ export const makeGrid = (size: number = 10) => {
 };
 
 export const rollDice = () => {
-  const diceValue = 6 + 1;
-  return Math.ceil(Math.random() * diceValue);
+  const rangeAccountingFor0Index = 6 + 1;
+  const diceValue = Math.ceil(Math.random() * rangeAccountingFor0Index);
+  return diceValue > 6 ? 6 : diceValue;
 };
 
 export const togglePlayer = (index: number) => {
@@ -85,6 +86,7 @@ export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
   const reversedGrid = [...grid].reverse();
   const gridWidth = Math.sqrt(reversedGrid.length);
   let gridLine: (number | string)[] = [];
+
   let line = 0;
 
   for (let i = 0; i < reversedGrid.length; i++) {
@@ -92,21 +94,24 @@ export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
 
     // make a function
     const playersAtCurrentPosition = players.filter((player) => {
-      if (player.position === reversedGrid.length - (i + 1)) {
+      if (player.position === reversedGrid.length - i) {
         return player;
       }
     });
 
     if (playersAtCurrentPosition.length === 1) {
-      gridLine[gridLine.length] = playersAtCurrentPosition[0].symbol;
-      i++;
+      const playerSymbol = playersAtCurrentPosition[0].symbol;
+      gridLine[gridLine.length - 1] = `\x1b[32m${padItem(playerSymbol)}\x1b[0m`;
     } else if (playersAtCurrentPosition.length === 2) {
-      gridLine[gridLine.length] =
-        `${playersAtCurrentPosition[0].symbol}/${playersAtCurrentPosition[1].symbol}`;
-      i++;
+      const playerOneSymbol = playersAtCurrentPosition[0].symbol;
+      const playerTwoSymbol = playersAtCurrentPosition[1].symbol;
+      gridLine[gridLine.length - 1] = `\x1b[32m${padItem(
+        `${playerOneSymbol}/${playerTwoSymbol}`
+      )}\x1b[0m`;
     }
 
     if ((i + 1) % gridWidth === 0) {
+
       gridLine = padArrayItems(gridLine);
       if (amIOdd(line)) {
         gridLine.reverse();
@@ -116,6 +121,7 @@ export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
       line++;
     }
   }
+
   return preparedArray;
 };
 
@@ -123,6 +129,5 @@ export const printGrid = (grid: number[], players: Player[]) => {
   const preparedGrid = prepareGridForPrinting(grid, players);
 
   const printableGrid = preparedGrid.map((line) => line.join(' ')).join('\n');
-
   return printableGrid;
 };
