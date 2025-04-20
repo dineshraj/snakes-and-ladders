@@ -1,6 +1,6 @@
 import { Interface } from 'readline/promises';
 import { Player } from '../types';
-import { padArrayItems } from './stuffNoOneCaresAbout';
+import { padArrayItems, amIOdd } from './stuffNoOneCaresAbout';
 
 export const makeGrid = (size: number = 10) => {
   const gridLength = size ** 2;
@@ -44,22 +44,22 @@ export const updatePosition = (
   snakes: number[][],
   rl: Interface
 ) => {
-    let newPosition = roll + player.position;
-    const newLadderPosition = ladderCheck(newPosition, ladders);
-    const newSnakePosition = snakeCheck(newPosition, snakes);
+  let newPosition = roll + player.position;
+  const newLadderPosition = ladderCheck(newPosition, ladders);
+  const newSnakePosition = snakeCheck(newPosition, snakes);
 
-    if (newLadderPosition !== newPosition) {
-      rl.write(
-        `Woo, you are going up a ladder from ${newPosition} to ${newLadderPosition}\n`
-      );
-      return newLadderPosition;
-    } else if (newSnakePosition !== newPosition) {
-      rl.write(
-        `Lol, you got eaten by a snake you actual fuck, you have gone from ${newPosition} to ${newSnakePosition}\n`
-      );
-      return newSnakePosition;
-    }
-    return newPosition;
+  if (newLadderPosition !== newPosition) {
+    rl.write(
+      `Woo, you are going up a ladder from ${newPosition} to ${newLadderPosition}\n`
+    );
+    return newLadderPosition;
+  } else if (newSnakePosition !== newPosition) {
+    rl.write(
+      `Lol, you got eaten by a snake you actual fuck, you have gone from ${newPosition} to ${newSnakePosition}\n`
+    );
+    return newSnakePosition;
+  }
+  return newPosition;
 };
 
 export const checkBounceBack = (
