@@ -73,8 +73,8 @@ describe('Snakes and Ladders', () => {
       someoneHasWonSpy.mockReturnValueOnce(true);
 
       const playerMock = [
-        { name: 'Dineshraj', position: 1, symbol: 'D' },
-        { name: 'Ooneshraj', position: 1, symbol: 'O' }
+        { name: 'Dineshraj', position: 1, symbol: '1' },
+        { name: 'Ooneshraj', position: 1, symbol: '2' }
       ];
 
       await SnakesAndLadders(gameObjectMock);
@@ -99,12 +99,12 @@ describe('Snakes and Ladders', () => {
         {
           name: 'Dee',
           position: 1,
-          symbol: 'D'
+          symbol: '1'
         },
         {
           name: 'Ooo',
           position: 1,
-          symbol: 'O'
+          symbol: '2'
         }
       ];
 
@@ -343,8 +343,8 @@ describe('Snakes and Ladders', () => {
 
       rollDiceSpy.mockReturnValueOnce(1).mockReturnValueOnce(1);
 
-      const expectedFirstOutput = '16 15 14 13\n9 10 11 12\n8 7 6 5\nD/O 2 3 4';
-      const expectedSecondOutput = '16 15 14 13\n9 10 11 12\n8 7 6 5\n1 D 3 4';
+      const expectedFirstOutput = ' 16  15  14  13\n  9  10  11  12\n  8   7   6   5\nD/O   2   3   4';
+      const expectedSecondOutput = ' 16  15  14  13\n  9  10  11  12\n  8   7   6   5\n  1   D   3   4';
 
       await snakesAndLadders.runGame(playerMock, gameObjectMock, rl);
 

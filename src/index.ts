@@ -54,21 +54,16 @@ export const runGame = async (
 ) => {
   let player = 0;
 
-  while (!someoneHasWon()) {
-
-    
+  while (!someoneHasWon()) {    
     const currentPlayer = players[player];
     rl.write(`\n\n${printGrid(grid, players)}\n\n`)
     rl.write(`${YOUR_MOVE} ${currentPlayer.name}\n`);
     const play = await rl.question(`${PLAY}`);
 
-    console.log("🚀 ~ play:", play)
     if (play === 'p') {
       const diceRoll = rollDice();
-      console.log("🚀 ~ diceRoll:", diceRoll)
 
       rl.write(`${ROLL} ${diceRoll}\n`);
-      const oldPosition = currentPlayer.position;
 
       currentPlayer.position = updatePosition(
         diceRoll,
@@ -80,7 +75,6 @@ export const runGame = async (
 
       currentPlayer.position = checkBounceBack(
         grid,
-        oldPosition,
         currentPlayer.position,
         rl
       );
@@ -88,7 +82,7 @@ export const runGame = async (
       rl.write(`${NEW_POSITION} ${currentPlayer.position}\n\n`);
 
       // winning condition
-      if (currentPlayer.position === 100) {
+      if (currentPlayer.position === grid.length) {
         rl.write(WINNER);
         return;
       } else {
@@ -115,8 +109,8 @@ const SnakesAndLadders = async (
 
   await runGame(
     [
-      { name: playerOne, position: 1, symbol: playerOne.charAt(0) },
-      { name: playerTwo, position: 1, symbol: playerTwo.charAt(0) }
+      { name: playerOne, position: 1, symbol: '1' },
+      { name: playerTwo, position: 1, symbol: '2' }
     ],
     gameObject,
     rl

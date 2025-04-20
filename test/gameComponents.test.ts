@@ -9,9 +9,16 @@ import {
   checkBounceBack,
   printGrid,
   prepareGridForPrinting,
-  amIOdd
 } from '../src/helpers/gameComponents';
-import * as gameComponents from '../src/helpers/gameComponents';
+
+const padThoseMotherFuckingArrayItemsOfArrays = (
+  array: Array<number | string>[]
+) => {
+  // this is because I am lazy
+  return array.forEach((item) => {
+    return item.toString().padStart(3);
+  });
+};
 
 describe('GameComponents', () => {
   beforeEach(() => {
@@ -35,14 +42,6 @@ describe('GameComponents', () => {
     expect(grid).toStrictEqual(expectedGrid);
   });
 
-  it('tells you if a number is odd or even', () => {
-    let isOdd = amIOdd(40);
-    expect(isOdd).toBe(false);
-
-    isOdd = amIOdd(41);
-    expect(isOdd).toBe(true);
-  });
-
   describe('visualising the grid', () => {
     it('structures the array in the correct way ready for printing and includes the player position', () => {
       const playerMock = [
@@ -51,12 +50,12 @@ describe('GameComponents', () => {
       ];
       const grid = makeGrid(6);
       const expectedOutput = [
-        [36, 35, 34, 33, 32, 31],
-        [25, 26, 27, 28, 29, 30],
-        [24, 23, 22, 21, 20, 19],
-        [13, 14, 15, 16, 17, 18],
-        [12, 11, 'O', 9, 8, 7],
-        [1, 2, 'D', 4, 5, 6]
+        [' 36', ' 35', ' 34', ' 33', ' 32', ' 31'],
+        [' 25', ' 26', ' 27', ' 28', ' 29', ' 30'],
+        [' 24', ' 23', ' 22', ' 21', ' 20', ' 19'],
+        [' 13', ' 14', ' 15', ' 16', ' 17', ' 18'],
+        [' 12', ' 11', '  O', '  9', '  8', '  7'],
+        ['  1', '  2', '  D', '  4', '  5', '  6']
       ];
       const printedGrid = prepareGridForPrinting(grid, playerMock);
 
@@ -70,12 +69,12 @@ describe('GameComponents', () => {
       ];
       const grid = makeGrid(6);
       const expectedOutput = [
-        [36, 35, 34, 33, 32, 31],
-        [25, 26, 27, 28, 29, 30],
-        [24, 23, 22, 21, 20, 19],
-        [13, 14, 15, 16, 17, 18],
-        [12, 11, 'D/O', 9, 8, 7],
-        [1, 2, 3, 4, 5, 6]
+        [' 36', ' 35', ' 34', ' 33', ' 32', ' 31'],
+        [' 25', ' 26', ' 27', ' 28', ' 29', ' 30'],
+        [' 24', ' 23', ' 22', ' 21', ' 20', ' 19'],
+        [' 13', ' 14', ' 15', ' 16', ' 17', ' 18'],
+        [' 12', ' 11', 'D/O', '  9', '  8', '  7'],
+        ['  1', '  2', '  3', '  4', '  5', '  6']
       ];
       const printedGrid = prepareGridForPrinting(grid, playerMock);
 
@@ -88,7 +87,8 @@ describe('GameComponents', () => {
         { name: 'Ooneshraj', position: 10, symbol: 'O' }
       ];
       const grid = makeGrid(4);
-      const expectedOutput = '16 15 14 13\n9 O 11 12\n8 7 6 5\n1 2 D 4';
+      const expectedOutput =
+        ' 16  15  14  13\n  9   O  11  12\n  8   7   6   5\n  1   2   D   4';
       const printedGrid = printGrid(grid, playerMock);
       expect(printedGrid).toStrictEqual(expectedOutput);
     });
@@ -103,7 +103,7 @@ describe('GameComponents', () => {
 
   describe('bounceBack()', () => {
     it('bounces back if the dice roll leads to a total above 100', () => {
-      const newPosition = checkBounceBack(makeGrid(), 99, 105, {
+      const newPosition = checkBounceBack(makeGrid(), 105, {
         write: jest.fn()
       } as unknown as Interface);
       const expectedPosition = 95;
@@ -112,7 +112,7 @@ describe('GameComponents', () => {
     });
 
     it('does not bounce back if the dice roll leads to a total below 100', () => {
-      const newPosition = checkBounceBack(makeGrid(), 69, 10, {
+      const newPosition = checkBounceBack(makeGrid(), 10, {
         write: jest.fn()
       } as unknown as Interface);
       const expectedPosition = 10;
@@ -130,12 +130,12 @@ describe('GameComponents', () => {
       expect(ladderValue).toBe(38);
     });
 
-    it('returns false if there is no matching ladder', () => {
+    it('returns the roll position if there is no matching ladder', () => {
       const ladders = [[1, 38]];
       const newPosition = 2;
       const ladderValue = ladderCheck(newPosition, ladders);
 
-      expect(ladderValue).toBe(false);
+      expect(ladderValue).toBe(2);
     });
   });
 
@@ -148,12 +148,12 @@ describe('GameComponents', () => {
       expect(snakeValue).toBe(22);
     });
 
-    it('returns false if there is no matching ladder', () => {
+    it('returns the existing position if there is no matching ladder', () => {
       const snakes = [[38, 22]];
       const newPosition = 37;
       const snakeValue = snakeCheck(newPosition, snakes);
 
-      expect(snakeValue).toBe(false);
+      expect(snakeValue).toBe(37);
     });
   });
 

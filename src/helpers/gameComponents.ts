@@ -1,5 +1,6 @@
 import { Interface } from 'readline/promises';
 import { Player } from '../types';
+import { padArrayItems } from './stuffNoOneCaresAbout';
 
 export const makeGrid = (size: number = 10) => {
   const gridLength = size ** 2;
@@ -21,13 +22,19 @@ export const togglePlayer = (index: number) => {
 export const ladderCheck = (newPosition: number, ladders: number[][]) => {
   const matchingLadder = ladders.find((ladder) => ladder[0] === newPosition);
 
-  return matchingLadder ? matchingLadder[1] : false;
+  if (matchingLadder) {
+    return matchingLadder[1];
+  }
+  return newPosition;
 };
 
 export const snakeCheck = (newPosition: number, snakes: number[][]) => {
   const matchingSnake = snakes.find((snake) => snake[0] === newPosition);
 
-  return matchingSnake ? matchingSnake[1] : false;
+  if (matchingSnake) {
+    return matchingSnake[1];
+  }
+  return newPosition;
 };
 
 export const updatePosition = (
@@ -37,36 +44,33 @@ export const updatePosition = (
   snakes: number[][],
   rl: Interface
 ) => {
-  let newPosition = roll + player.position;
-  const goingUpALadder = ladderCheck(newPosition, ladders);
-  const goingDownSnake = snakeCheck(newPosition, snakes);
-  if (goingUpALadder) {
-    rl.write(
-      `Woo, you are going up a ladder from ${newPosition} to ${goingUpALadder}\n`
-    );
-    newPosition = goingUpALadder;
-  } else if (goingDownSnake) {
-    rl.write(
-      `Lol, you got eaten by a snake you actual fuck, you have gone from ${newPosition} to ${goingDownSnake}\n`
-    );
-    newPosition = goingDownSnake;
-  }
-  return newPosition;
+    let newPosition = roll + player.position;
+    const newLadderPosition = ladderCheck(newPosition, ladders);
+    const newSnakePosition = snakeCheck(newPosition, snakes);
+
+    if (newLadderPosition !== newPosition) {
+      rl.write(
+        `Woo, you are going up a ladder from ${newPosition} to ${newLadderPosition}\n`
+      );
+      return newLadderPosition;
+    } else if (newSnakePosition !== newPosition) {
+      rl.write(
+        `Lol, you got eaten by a snake you actual fuck, you have gone from ${newPosition} to ${newSnakePosition}\n`
+      );
+      return newSnakePosition;
+    }
+    return newPosition;
 };
 
 export const checkBounceBack = (
   grid: number[],
-  oldPostion: number,
   newPosition: number,
   rl: Interface
 ) => {
   const winningGridValue = grid.length;
   if (newPosition > winningGridValue) {
     const howMuchOverWin = newPosition - winningGridValue;
-    const howMuchUnderWinBefore = winningGridValue - oldPostion;
-
-    const bounceBackPosition =
-      oldPostion + howMuchUnderWinBefore - howMuchOverWin;
+    const bounceBackPosition = winningGridValue - howMuchOverWin;
     rl.write(
       `oh no you bounced back to ${bounceBackPosition} cause your ass rolled too much`
     );
@@ -76,12 +80,7 @@ export const checkBounceBack = (
   return newPosition;
 };
 
-export const amIOdd = (value: number) => {
-  return value % 2 !== 0;
-};
-
 export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
-  console.log("🚀 ~ prepareGridForPrinting ~ players:", players)
   const preparedArray: (string | number)[][] = [];
   const reversedGrid = [...grid].reverse();
   const gridWidth = Math.sqrt(reversedGrid.length);
@@ -108,6 +107,7 @@ export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
     }
 
     if ((i + 1) % gridWidth === 0) {
+      gridLine = padArrayItems(gridLine);
       if (amIOdd(line)) {
         gridLine.reverse();
       }
@@ -116,8 +116,6 @@ export const prepareGridForPrinting = (grid: number[], players: Player[]) => {
       line++;
     }
   }
-
-  console.log("🚀 ~ prepareGridForPrinting ~ preparedArray:", preparedArray)
   return preparedArray;
 };
 
